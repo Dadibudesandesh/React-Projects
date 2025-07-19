@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function App() {
   const [task, setTask] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editingText, setEditingText] = useState('');
 
   const handleAddTask = () => {
     if (task.trim() === '') return;
@@ -11,7 +13,7 @@ function App() {
     const newTask = {
       id: Date.now(),
       text: task,
-      completed: false 
+      completed: false
     };
 
     setTasks([...tasks, newTask]);
@@ -27,6 +29,26 @@ function App() {
     setTasks(tasks.map(t =>
       t.id === id ? { ...t, completed: !t.completed } : t
     ));
+  }
+
+  const handleEditClick = (task) => {
+    setEditingId(task.id);
+    setEditingText(task.text);
+  }
+
+  const handleEditingChange = (e) => {
+    setEditingText(e.target.value)
+  }
+
+  const handleSaveEdit = (id) => {
+    setTasks(tasks.map(t => t.id === id ? { ...t, text: editingText } : t));
+     setEditingId(null)
+    setEditingText('');
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setEditingText('');
   }
 
   return (
@@ -51,18 +73,51 @@ function App() {
               key={t.id}
               className={`list-group-item d-flex justify-content-between align-items-center ${t.completed ? 'list-group-item-success' : ''}`}
             >
-              <span
-                onClick={() => handleToggleComplete(t.id)}
-                style={{ textDecoration: t.completed ? 'line-through' : 'none', cursor: "pointer" }}
-              >
-                {t.text}
-              </span>
-              <button
-                className="btn btn-sm btn-danger"
-                onClick={() => handleDeleteTask(t.id)}
-              >
-                Delete
-              </button>
+              <div className="d-flex align-items-center flex-grow-1">
+                {
+                  editingId === t.id ? (<input className="form-control me-2" value={editingText} onChange={handleEditingChange} />) : (<span
+                    onClick={() => handleToggleComplete(t.id)}
+                    style={{ textDecoration: t.completed ? 'line-through' : 'none', cursor: "pointer" }}
+                  >
+                    {t.text}
+                  </span>
+                  )}
+              </div>
+              <div className="btn-group">
+                {editingId === t.id ? (
+                  <>
+                    <button
+                      className="btn btn-sm btn-success"
+                      onClick={() => handleSaveEdit(t.id)}
+                    >
+                      Save
+                    </button>
+                    <button
+                      className="btn btn-sm btn-secondary"
+                      onClick={() => handleCancelEdit(t.id)}
+                    >
+                      cancel
+                    </button>
+                  </>
+                ) :
+                  (<button
+                    className="btn btn-sm btn-warning"
+                    onClick={() => handleEditClick(t)}
+                  >
+                    Edit
+                  </button>
+                  )
+                }
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => handleDeleteTask(t.id)}
+                >
+                  Delete
+                </button>
+              </div>
+
+
+
             </li>
           ))}
         </ul>
