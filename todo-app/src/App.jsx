@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -6,30 +7,57 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editingText, setEditingText] = useState('');
+  
+
+  useEffect(() => {
+    try {
+      const storedTasks = localStorage.getItem('tasks');
+      if (storedTasks) {
+        const parsedTasks = JSON.parse(storedTasks);
+        if (Array.isArray(parsedTasks)) {
+          setTasks(parsedTasks);
+        }
+      }
+    } catch (err) {
+      console.error("Error reading tasks from localStorage:", err);
+    }
+  }, []);
+
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   const handleAddTask = () => {
-    if (task.trim() === '') return;
-
-    const newTask = {
-      id: Date.now(),
-      text: task,
-      completed: false
-    };
-
-    setTasks([...tasks, newTask]);
-    setTask('');
+    if (task.trim() === '') {
+      alert("Enter task")
+    } else {
+      const newTask = {
+        id: Date.now(),
+        text: task,
+        completed: false
+      };
+      // console.log(...tasks)
+      console.log(Date.now())
+      setTasks([...tasks, newTask]);
+      setTask('');
+    }
   }
+
 
   const handleDeleteTask = (id) => {
     const filteredTasks = tasks.filter((task) => task.id !== id);
+    console.log(tasks)
+    // console.log(filteredTasks)
     setTasks(filteredTasks);
   }
 
   const handleToggleComplete = (id) => {
+    // console.log(id)
     setTasks(tasks.map(t =>
       t.id === id ? { ...t, completed: !t.completed } : t
     ));
-  }
+}
 
   const handleEditClick = (task) => {
     setEditingId(task.id);
@@ -42,7 +70,7 @@ function App() {
 
   const handleSaveEdit = (id) => {
     setTasks(tasks.map(t => t.id === id ? { ...t, text: editingText } : t));
-     setEditingId(null)
+    setEditingId(null)
     setEditingText('');
   }
 
@@ -52,19 +80,21 @@ function App() {
   }
 
   return (
-    <div className='App d-flex justify-content-center align-items-center flex-column vh-100 bg-light'>
-      <div className="card p-4 shadow" style={{ minWidth: '350px' }}>
-        <h2 className="text-center mb-4">📝 To-Do List</h2>
-        <div className="input-group mb-3">
+    <div className='App d-flex justify-content-center align-items-center flex-column vh-100 bg-dark'>
+      <div className="card p-4 shadow" style={{ minWidth: '900px' }}>
+        <h1 className="text-center mb-4">📝 To-Do List</h1>
+        <div className="input-group mb-4">
           <input
             type="text"
             value={task}
             className="form-control"
             placeholder="Enter a task"
             onChange={(e) => setTask(e.target.value)}
-            required
           />
-          <button className="btn btn-primary" onClick={handleAddTask}>Add</button>
+
+
+
+          <button className="btn btn-success" onClick={handleAddTask}>Add</button>
         </div>
 
         <ul className="list-group">
@@ -115,9 +145,6 @@ function App() {
                   Delete
                 </button>
               </div>
-
-
-
             </li>
           ))}
         </ul>
